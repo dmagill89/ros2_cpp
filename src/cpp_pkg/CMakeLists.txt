@@ -9,7 +9,15 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 
+# Generate custom interface
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "srv/OddEvenCheck.srv"
+  ADD_LINTER_TESTS
+)
+
+rosidl_get_typesupport_target(cpp_typesupport_target "${PROJECT_NAME}" "rosidl_typesupport_cpp")
 
 add_executable(publisher src/publisher.cpp)
 ament_target_dependencies(publisher rclcpp std_msgs)
@@ -23,12 +31,18 @@ ament_target_dependencies(rpm_pub rclcpp std_msgs)
 add_executable(speed_calc src/speed_calc.cpp)
 ament_target_dependencies(speed_calc rclcpp std_msgs)
 
+add_executable(service_server src/service_server.cpp)
+ament_target_dependencies(service_server rclcpp std_msgs)
+
+target_link_libraries(service_server "${cpp_typesupport_target}")
+
 # config for ROS2 cli tools
 install(TARGETS
   publisher
   subscriber
   rpm_pub
   speed_calc
+  service_server
   DESTINATION lib/${PROJECT_NAME}
 )
 

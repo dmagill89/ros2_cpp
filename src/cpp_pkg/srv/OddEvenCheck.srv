@@ -1,0 +1,5 @@
+# Request
+int64 number      # Number to check if odd or even
+---
+#Response
+string decision   # Either "odd" or "even"
