@@ -10,10 +10,16 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(cv_bridge REQUIRED)
 
 # Generate custom interface
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/OddEvenCheck.srv"
+  "srv/TurnCamera.srv"
+  DEPENDENCIES
+  sensor_msgs
   ADD_LINTER_TESTS
 )
 
@@ -37,8 +43,16 @@ ament_target_dependencies(service_server rclcpp std_msgs)
 add_executable(service_client src/service_client.cpp)
 ament_target_dependencies(service_client rclcpp std_msgs)
 
+add_executable(turn_camera_service src/turn_camera_service.cpp)
+ament_target_dependencies(turn_camera_service rclcpp std_msgs OpenCV cv_bridge)
+
+add_executable(turn_camera_client src/turn_camera_client.cpp)
+ament_target_dependencies(turn_camera_client rclcpp std_msgs OpenCV cv_bridge)
+
 target_link_libraries(service_server "${cpp_typesupport_target}")
 target_link_libraries(service_client "${cpp_typesupport_target}")
+target_link_libraries(turn_camera_service "${cpp_typesupport_target}")
+target_link_libraries(turn_camera_client "${cpp_typesupport_target}")
 
 # config for ROS2 cli tools
 install(TARGETS
@@ -48,6 +62,8 @@ install(TARGETS
   speed_calc
   service_server
   service_client
+  turn_camera_service
+  turn_camera_client
   DESTINATION lib/${PROJECT_NAME}
 )
 
