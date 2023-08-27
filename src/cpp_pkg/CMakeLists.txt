@@ -13,18 +13,23 @@ find_package(rosidl_default_generators REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(cv_bridge REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(action_msgs REQUIRED)
+find_package(rclcpp_action REQUIRED)
 
 # Generate custom interface
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/OddEvenCheck.srv"
   "srv/TurnCamera.srv"
+  "action/Navigate.action"
   DEPENDENCIES
-  sensor_msgs
+  sensor_msgs geometry_msgs action_msgs
   ADD_LINTER_TESTS
 )
 
 rosidl_get_typesupport_target(cpp_typesupport_target "${PROJECT_NAME}" "rosidl_typesupport_cpp")
 
+# create executables 
 add_executable(publisher src/publisher.cpp)
 ament_target_dependencies(publisher rclcpp std_msgs)
 
@@ -38,21 +43,28 @@ add_executable(speed_calc src/speed_calc.cpp)
 ament_target_dependencies(speed_calc rclcpp std_msgs)
 
 add_executable(service_server src/service_server.cpp)
-ament_target_dependencies(service_server rclcpp std_msgs)
+ament_target_dependencies(service_server rclcpp) 
+target_link_libraries(service_server "${cpp_typesupport_target}")
 
 add_executable(service_client src/service_client.cpp)
-ament_target_dependencies(service_client rclcpp std_msgs)
+ament_target_dependencies(service_client rclcpp) 
+target_link_libraries(service_client "${cpp_typesupport_target}")
 
 add_executable(turn_camera_service src/turn_camera_service.cpp)
-ament_target_dependencies(turn_camera_service rclcpp std_msgs OpenCV cv_bridge)
+ament_target_dependencies(turn_camera_service rclcpp sensor_msgs OpenCV cv_bridge) 
+target_link_libraries(turn_camera_service "${cpp_typesupport_target}")
 
 add_executable(turn_camera_client src/turn_camera_client.cpp)
-ament_target_dependencies(turn_camera_client rclcpp std_msgs OpenCV cv_bridge)
-
-target_link_libraries(service_server "${cpp_typesupport_target}")
-target_link_libraries(service_client "${cpp_typesupport_target}")
-target_link_libraries(turn_camera_service "${cpp_typesupport_target}")
+ament_target_dependencies(turn_camera_client rclcpp sensor_msgs OpenCV cv_bridge) 
 target_link_libraries(turn_camera_client "${cpp_typesupport_target}")
+
+add_executable(action_server src/action_server.cpp)
+ament_target_dependencies(action_server rclcpp geometry_msgs action_msgs rclcpp_action) 
+target_link_libraries(action_server "${cpp_typesupport_target}")
+
+add_executable(action_client src/action_client.cpp)
+ament_target_dependencies(action_client rclcpp geometry_msgs action_msgs rclcpp_action) 
+target_link_libraries(action_client "${cpp_typesupport_target}")
 
 # config for ROS2 cli tools
 install(TARGETS
@@ -64,6 +76,8 @@ install(TARGETS
   service_client
   turn_camera_service
   turn_camera_client
+  action_server
+  action_client
   DESTINATION lib/${PROJECT_NAME}
 )
 
